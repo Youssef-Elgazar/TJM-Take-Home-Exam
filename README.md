@@ -10,6 +10,10 @@ label-relative geometry, or clipboard readback, never by hardcoded coordinates. 
 is extracted with **RapidOCR** and optionally an **LLM** vision pass, then validated by
 deterministic code before any UI interaction.
 
+The optional vision stage calls Anthropic's Messages API with the model configured in
+`ANTHROPIC_MODEL` (default **`claude-sonnet-4-5`**). The pipeline also runs fully
+offline with OCR only.
+
 ## Status
 
 | Part | State |
@@ -47,20 +51,25 @@ In progress:
 │   └── design.md            Part 1 design document
 ├── samples/
 │   ├── order_sample.png     supplied order image
-│   └── expected.json        ground-truth fixture
+│   ├── expected.json        ground-truth fixture
+│   └── spine_order.json     fixture for the existing-master-data spine
 ├── src/
 │   ├── config.py            .env loader (no extra dependency)
 │   ├── errors.py            ManualReviewRequired
-│   └── extract/
-│       ├── schema.py        typed model + price helpers
-│       ├── ocr.py           RapidOCR wrapper (text, score, boxes)
-│       ├── parser.py        deterministic label/table parser (offline)
-│       ├── llm.py           optional Anthropic vision stage
-│       ├── validate.py      formats + totals + OCR cross-check
-│       ├── extract.py       image -> validated order orchestrator
-│       └── __main__.py      CLI
+│   ├── extract/
+│   │   ├── schema.py        typed model + price helpers
+│   │   ├── ocr.py           RapidOCR wrapper (text, score, boxes)
+│   │   ├── parser.py        deterministic label/table parser (offline)
+│   │   ├── llm.py           optional Anthropic vision stage
+│   │   ├── validate.py      formats + totals + OCR cross-check
+│   │   ├── extract.py       image -> validated order orchestrator
+│   │   └── __main__.py      CLI
+│   ├── ui/                  UIA driver, clipboard, grid geometry, selectors
+│   ├── screens/             order and invoice screens
+│   └── flows/spine.py       Order-first spine flow
 └── tests/
-    └── test_extract.py
+    ├── test_extract.py
+    └── probes/              exploratory UIA probes (kept for reference)
 ```
 
 ## Requirements
@@ -69,6 +78,7 @@ In progress:
 - Fakturama installed and running for the UI flow.
 - Python 3.12+ (developed on 3.14).
 - RapidOCR ships its own ONNX models; no separate Tesseract install is needed.
+- An Anthropic API key is only needed for the optional LLM stage; OCR works offline.
 
 ## Setup
 
@@ -76,8 +86,20 @@ In progress:
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
-Copy-Item .env.example .env   # optional: fill in LLM settings
+Copy-Item .env.example .env
 ```
+
+Then edit `.env`:
+
+```dotenv
+ANTHROPIC_API_KEY=sk-ant-...
+ANTHROPIC_BASE_URL=https://api.anthropic.com
+ANTHROPIC_MODEL=claude-sonnet-4-5
+FAKTURAMA_USE_LLM=1
+```
+
+`ANTHROPIC_AUTH_TOKEN` can be used instead of `ANTHROPIC_API_KEY` if your gateway
+expects it. `FAKTURAMA_USE_LLM=0` (or leaving the key blank) keeps the run offline.
 
 ## Run the extraction
 
@@ -117,12 +139,14 @@ environment (blank values are ignored):
 | Variable | Purpose |
 |---|---|
 | `ANTHROPIC_API_KEY` / `ANTHROPIC_AUTH_TOKEN` | LLM credentials (optional) |
-| `ANTHROPIC_BASE_URL` | Messages API base URL |
-| `ANTHROPIC_MODEL` | vision-capable model name |
+| `ANTHROPIC_BASE_URL` | Messages API base URL (default `https://api.anthropic.com`) |
+| `ANTHROPIC_MODEL` | vision-capable model name (used: **`claude-sonnet-4-5`**) |
 | `FAKTURAMA_USE_LLM` | `1` to enable the LLM stage by default |
 
+The vision stage sends the image plus the OCR text to Anthropic's Messages API and
+asks for the typed JSON schema; the deterministic validator still runs on the result.
 The pipeline runs fully offline with OCR when no LLM is configured or the endpoint is
-unreachable; the validator still applies to both paths.
+unreachable.
 
 ## How it works
 
@@ -133,8 +157,10 @@ unreachable; the validator still applies to both paths.
 3. **Validate** (`validate.py`) recomputes `qty × unit net × (1 − discount)` per line,
    then net/VAT/gross, and refuses to continue on any mismatch or on a value that is
    absent from the raw OCR text.
-4. **Drive the UI** (planned) — one state machine with a verification gate after every
-   step and a single `ManualReviewRequired` stop condition.
+4. **Drive the UI** — `src/ui/` holds the UIA driver, clipboard readback, selector
+   dialogs and OCR-derived grid columns; `src/screens/` holds the Order and Invoice
+   editors; `src/flows/spine.py` runs the state machine with a verification gate after
+   every step and a single `ManualReviewRequired` stop condition.
 
 ## Notes and known quirks
 

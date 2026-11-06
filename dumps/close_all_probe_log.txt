@@ -1,0 +1,4 @@
+File items: [<RECT L0, T29, R41, B53>]
+menu items: ['Close\tCtrl+W', 'Close All\tCtrl+Shift+W', 'Save\tCtrl+S', 'Save All\tCtrl+Shift+S', 'Print', 'Select Workspace', 'Preferences', 'Web Shop', 'Import..', 'Export..', 'Quit Fakturama', 'System', 'File', 'Edit', 'Data', 'New', 'Extra', 'Window', 'Help']
+menu: 'File' ['Close\tCtrl+W', 'Close All\tCtrl+Shift+W', 'Save\tCtrl+S', 'Save All\tCtrl+Shift+S', 'Print', 'Select Workspace', 'Preferences', 'Web Shop', 'Import..', 'Export..', 'Quit Fakturama']
+tabs: ['Invoice address', 'Fakturama', 'PO000003', 'INV000002']

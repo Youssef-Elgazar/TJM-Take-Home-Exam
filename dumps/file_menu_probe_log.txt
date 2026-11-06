@@ -1,0 +1,10 @@
+File items: [<RECT L0, T29, R41, B53>]
+main menuitems: ['Close', 'Close All', 'Save', 'Save All', 'Print', 'Select Workspace', 'Preferences', 'Web Shop', 'Import..', 'Export..', 'Quit Fakturama', 'System', 'File', 'Edit', 'Data', 'New', 'Extra', 'Window', 'Help']
+Menu controls:
+  menu: 'File' (L0, T53, R229, B411) ['Close', 'Close All', 'Save', 'Save All', 'Print', 'Select Workspace', 'Preferences', 'Web Shop', 'Import..', 'Export..', 'Quit Fakturama']
+other windows:
+  window: 'Taskbar' Shell_TrayWnd
+  window: 'design.md - Take-Home-Exam - Python - Visual Studio Code' Chrome_WidgetWin_1
+  window: 'C:\\Users\\joe\\Projects\\TJM\\Take-Home-Exam\\agents - File Explorer' CabinetWClass
+    item: 'System'
+  window: 'Program Manager' Progman

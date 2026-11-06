@@ -12,6 +12,7 @@ from pathlib import Path
 
 from ..errors import ManualReviewRequired
 from ..extract.schema import ExtractedOrder
+from ..screens import documents
 from ..screens import invoice as invoice_screen
 from ..screens import order as order_screen
 from ..ui.driver import get_app, snap
@@ -96,6 +97,11 @@ def run_spine(fixture_path: str | Path) -> dict:
     check("Invoice VAT", totals.get("VAT"), expected.totals.vat)
     check("Invoice Total", totals.get("Total"), expected.totals.gross)
     snap(app, "spine_5_verified")
+
+    log("[8] Close tabs and open Documents")
+    documents.close_all_tabs(app)
+    documents.open_documents(app)
+    snap(app, "spine_6_documents")
 
     log("SPINE OK")
     return {"order": order_number, "invoice": invoice_number,
