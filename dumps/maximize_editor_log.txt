@@ -1,0 +1,6 @@
+grid before: (L434, T429, R1917, B557)
+editor buttons: [('Minimize', <RECT L1868, T132, R1891, B154>), ('Maximize', <RECT L1891, T132, R1914, B154>)]
+clicked: Restore
+grid after: (L430, T429, R1894, B789)
+Remarks label: (L386, T792, R442, B812)
+images near Remarks: [<RECT L422, T822, R442, B842>]

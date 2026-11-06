@@ -14,17 +14,44 @@ MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
           "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 
 
+def maximize_editor(app: App) -> None:
+    """Maximize the document editor so the Items grid is not clipped by Remarks."""
+    buttons = [button for button in
+               app.wrapper.descendants(control_type="Button")
+               if (button.window_text() or "").strip()
+               in ("Minimize", "Maximize", "Restore")
+               and button.rectangle().left > 1700
+               and 120 <= button.rectangle().top <= 190]
+    buttons.sort(key=lambda item: item.rectangle().left)
+    if len(buttons) >= 2 and (buttons[1].window_text() or "").strip() == "Maximize":
+        click(buttons[1])
+        time.sleep(1.2)
+
+
 def open_new_order(app: App) -> None:
     # Reuse a leftover New Order instead of stacking a second one.
     for tab in app.wrapper.descendants(control_type="TabItem"):
         if (tab.window_text() or "").lstrip("*") == "New Order":
             click(tab)
             time.sleep(0.9)
+            maximize_editor(app)
             return
     app.spec.child_window(title="Create: New Order",
                           control_type="Button").click_input()
     time.sleep(2.0)
     wait_for_tab(app, "New Order")
+    maximize_editor(app)
+
+
+def activate_order_tab(app: App) -> None:
+    for tab in app.wrapper.descendants(control_type="TabItem"):
+        title = (tab.window_text() or "").lstrip("*")
+        if title == "New Order" or (title.startswith("PO")
+                                    and title[2:].isdigit()):
+            click(tab)
+            time.sleep(0.8)
+            return
+    raise RuntimeError("order tab not found")
 
 
 def wait_for_tab(app: App, name: str, timeout: float = 8.0) -> None:

@@ -1,0 +1,1 @@
+tabs: ['Invoice address', 'Fakturama', '*New Order', 'Documents', 'terms of payment']

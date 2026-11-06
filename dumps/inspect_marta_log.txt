@@ -1,0 +1,34 @@
+CRASHED:
+Traceback (most recent call last):
+  File "C:\Users\joe\Projects\TJM\Take-Home-Exam\.venv\Lib\site-packages\pywinauto\application.py", line 250, in __resolve_control
+    ctrl = wait_until_passes(
+        timeout,
+    ...<5 lines>...
+         controls.InvalidElement),
+        criteria)
+  File "C:\Users\joe\Projects\TJM\Take-Home-Exam\.venv\Lib\site-packages\pywinauto\timings.py", line 458, in wait_until_passes
+    raise err
+pywinauto.timings.TimeoutError
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\joe\Projects\TJM\Take-Home-Exam\tests\probes\fk.py", line 199, in run
+    main()
+    ~~~~^^
+  File "C:\Users\joe\Projects\TJM\Take-Home-Exam\tests\probes\inspect_marta.py", line 18, in main
+    control_type="Edit").wrapper_object()
+                         ~~~~~~~~~~~~~~^^
+  File "C:\Users\joe\Projects\TJM\Take-Home-Exam\.venv\Lib\site-packages\pywinauto\application.py", line 267, in wrapper_object
+    ctrls = self.__resolve_control(self.criteria)
+  File "C:\Users\joe\Projects\TJM\Take-Home-Exam\.venv\Lib\site-packages\pywinauto\application.py", line 261, in __resolve_control
+    raise e.original_exception
+  File "C:\Users\joe\Projects\TJM\Take-Home-Exam\.venv\Lib\site-packages\pywinauto\timings.py", line 436, in wait_until_passes
+    func_val = func(*args, **kwargs)
+  File "C:\Users\joe\Projects\TJM\Take-Home-Exam\.venv\Lib\site-packages\pywinauto\application.py", line 222, in __get_ctrl
+    ctrl = self.backend.generic_wrapper_class(findwindows.find_element(**ctrl_criteria))
+                                              ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^
+  File "C:\Users\joe\Projects\TJM\Take-Home-Exam\.venv\Lib\site-packages\pywinauto\findwindows.py", line 87, in find_element
+    raise ElementNotFoundError(kwargs)
+pywinauto.findwindows.ElementNotFoundError: {'title': 'Customer ID', 'control_type': 'Edit', 'top_level_only': False, 'parent': <uia_element_info.UIAElementInfo - 'Fakturama - C:\Fakturama', SWT_Window0, 329248>, 'backend': 'uia'}
+

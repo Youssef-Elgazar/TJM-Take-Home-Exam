@@ -1,0 +1,3 @@
+dialog: (L599, T338, R1321, B597)
+clicked OK
+tabs: ['Error', 'Invoice address', 'Fakturama', '*New Order', 'Bank Transfer', 'Documents', 'terms of payment']

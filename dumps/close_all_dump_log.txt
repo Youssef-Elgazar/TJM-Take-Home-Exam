@@ -1,0 +1,3 @@
+top-level windows:
+main checkboxes:
+tabs: ['Addresses', 'Miscellaneous', 'Notice', 'Fakturama', '*New Order', 'Bank Transfer', '*New Debtor', 'Documents', 'terms of payment']

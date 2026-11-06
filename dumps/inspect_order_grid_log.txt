@@ -1,0 +1,7 @@
+grid: (L434, T374, R1896, B502)
+row 1 at y=405: '3.00\tCHR-ERG-01\tnull\tErgonomic Desk Chair\t\tVAT taxValue: [0.19] salesEqualizationTax: [null] description: [VAT 19%] name: [VAT 19%] dateAdded: [Fri Nov 06 00:00:00 EET 2026] modifiedBy: [joe] modified: [null] id: [2] deleted: [false] validFrom: [Fri Nov 06 00:00:00 EET 2026] validTo: [null]\tGBP 40\t0.0\tGBP 120'
+row 2 at y=425: '3.00\tCHR-ERG-01\tnull\tErgonomic Desk Chair\t\tVAT taxValue: [0.19] salesEqualizationTax: [null] description: [VAT 19%] name: [VAT 19%] dateAdded: [Fri Nov 06 00:00:00 EET 2026] modifiedBy: [joe] modified: [null] id: [2] deleted: [false] validFrom: [Fri Nov 06 00:00:00 EET 2026] validTo: [null]\tGBP 40\t0.0\tGBP 120'
+row 3 at y=445: '1.00\tMAT-DESK-02\tnull\tAnti-Fatigue Desk Mat\t\tVAT taxValue: [0.19] salesEqualizationTax: [null] description: [VAT 19%] name: [VAT 19%] dateAdded: [Fri Nov 06 00:00:00 EET 2026] modifiedBy: [joe] modified: [null] id: [2] deleted: [false] validFrom: [Fri Nov 06 00:00:00 EET 2026] validTo: [null]\tGBP 40\t0.0\tGBP 40'
+Total Net '£160.00'
+VAT '£30.40'
+Total '£190.40'

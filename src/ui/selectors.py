@@ -6,15 +6,37 @@ import time
 from pywinauto import mouse
 
 from ..errors import ManualReviewRequired
-from .driver import (App, click, clip_clear, clip_get, normalise,
-                     send_keys_to_hwnd)
+from ..extract.ocr import run_ocr
+from .driver import (DUMPS, App, click, clip_clear, clip_get,
+                     dismiss_internal_error, normalise, send_keys_to_hwnd)
 from .grid import address_icons, items_icons
 
 ROW_HEIGHT = 19
 
 
+def _dialog_has_rows(app: App, dialog, search_rect) -> bool:
+    """OCR the table below the header; empty means copying would NPE."""
+    try:
+        image = dialog.capture_as_image()
+        dr = dialog.rectangle()
+        top = max(0, search_rect.bottom - dr.top + 34)
+        bottom = max(top + 1, image.height - 95)
+        crop = image.crop((0, top, image.width, bottom))
+        DUMPS.mkdir(exist_ok=True)
+        path = DUMPS / "dialog_rows_check.png"
+        crop.save(path)
+        lines = [line for line in run_ocr(path).lines
+                 if (line.text or "").strip() and line.score > 0.5]
+        return len(lines) > 0
+    except Exception:
+        return True
+
+
 def _walk_rows(app: App, dialog, search_rect, max_rows: int = 25) -> list[str]:
     """Click the first row, copy it, press DOWN, repeat until empty/repeat."""
+    if not _dialog_has_rows(app, dialog, search_rect):
+        return []
+
     x = dialog.rectangle().left + 120
     y = search_rect.bottom + 40
     mouse.click(button="left", coords=(x, y))
@@ -26,6 +48,8 @@ def _walk_rows(app: App, dialog, search_rect, max_rows: int = 25) -> list[str]:
         clip_clear()
         send_keys_to_hwnd(dialog.handle, "^c", dialog.rectangle())
         time.sleep(0.25)
+        if dismiss_internal_error(app):
+            return rows
         text = clip_get()
         if not text or text == previous:
             break

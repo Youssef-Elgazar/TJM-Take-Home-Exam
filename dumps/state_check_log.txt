@@ -1,5 +1,5 @@
-foreground: 526140 target: 787932 match: False
+foreground: 657664 target: 329248 match: False
 force_foreground: True
-foreground now: 787932
-tabs: ['Fakturama']
+foreground now: 329248
+tabs: ['Invoice address', 'Delivery address', 'Fakturama', '*New Order', 'Documents', 'Products', 'terms of payment']
 keyboard test (ESC): True

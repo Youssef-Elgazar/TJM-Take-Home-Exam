@@ -1,0 +1,3 @@
+items: [('New Order', <RECT L800, T296, R911, B321>)]
+clicked OK
+tabs: ['Addresses', 'Miscellaneous', 'Notice', 'Fakturama', '*New Debtor', 'Documents', 'terms of payment']

@@ -1,0 +1,2 @@
+  !! expected window not in foreground, skipping keys: {ESC}
+tabs: ['Fakturama', 'Debtors', 'Products']

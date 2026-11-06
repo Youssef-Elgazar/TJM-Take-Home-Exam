@@ -1,0 +1,7 @@
+tabs: ['Documents', 'Main address', 'Addresses', 'Miscellaneous', 'Notice', 'New product', 'New Debtor']
+address type label: (L471, T612, R555, B632)
+arrow candidates: [(<RECT L1154, T609, R1175, B635>, ''), (<RECT L1896, T603, R1917, B624>, 'Line down')]
+checkboxes after click:
+   'Invoice address' (L1177, T639, R1303, B659)
+   'Delivery address' (L1315, T639, R1448, B659)
+top-level windows:

@@ -1,0 +1,2 @@
+save-parts items: ['New Debtor']
+tabs: ['Fakturama', 'Documents', 'terms of payment']

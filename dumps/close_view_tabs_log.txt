@@ -1,5 +1,4 @@
-middle-click VATs
-closed VATs
 middle-click terms of payment
-closed terms of payment
-tabs: ['Documents']
+right-click terms of payment
+menu: ['System', 'System', 'File', 'Edit', 'Data', 'New', 'Extra', 'Window', 'Help']
+tabs: ['Documents', 'terms of payment', 'Error']

@@ -1,0 +1,3 @@
+tabs: ['Documents', 'terms of payment']
+edits: [('', <RECT L1752, T675, R1902, B701>)]
+no list pane

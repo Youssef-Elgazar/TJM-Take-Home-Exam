@@ -1,0 +1,3 @@
+top-level windows:
+press ENTER
+tabs: ['Documents', 'terms of payment', 'Error']

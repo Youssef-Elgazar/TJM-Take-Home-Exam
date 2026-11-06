@@ -1,0 +1,13 @@
+tabs: ['Error', 'Invoice address', 'Delivery address', 'Fakturama', '*New Order', 'Bank Transfer', 'Northstar Office GmbH, Marta Klein', 'Documents', 'terms of payment']
+edits:
+   'Cust.Ref.' (L468, T244, R964, B270)
+   'Consultant' (L1059, T334, R1389, B360)
+   'Total Net' (L1573, T481, R1891, B507)
+   'Discount' (L1573, T512, R1891, B538)
+   'Shipping' (L1122, T546, R1544, B568)
+   'VAT' (L1573, T576, R1891, B602)
+   'Total' (L1573, T607, R1891, B633)
+combos:
+   '' (L1082, T170, R1395, B198)
+   'VAT' (L1059, T370, R1389, B398)
+   'Shipping' (L1119, T543, R1568, B571)

@@ -119,7 +119,7 @@ def send_keys_to_hwnd(hwnd: int, seq: str, rect=None) -> None:
             raise RuntimeError(
                 f"window {hwnd} is not in the foreground "
                 f"(foreground={foreground}, pid={_process_id(foreground)})")
-    send_keys(seq)
+    send_keys(seq, with_spaces=True)
     time.sleep(0.05)
 
 
@@ -204,3 +204,153 @@ def parse_money(text: str | None) -> float | None:
 
 def normalise(text: str | None) -> str:
     return " ".join((text or "").split()).casefold()
+
+
+def menu_item(app: App, title: str):
+    """Find a menu item by its label (the text includes the shortcut)."""
+    for item in app.wrapper.descendants(control_type="MenuItem"):
+        text = (item.window_text() or "").split("\t")[0].strip()
+        if text == title:
+            return item
+    return None
+
+
+def reset_perspective(app: App) -> None:
+    window = menu_item(app, "Window")
+    if window is None:
+        return
+    click(window)
+    time.sleep(0.6)
+    reset = menu_item(app, "Reset Perspective")
+    if reset is None:
+        send_keys_to(app, "{ESC}")
+        return
+    click(reset)
+    time.sleep(1.0)
+    for win in Desktop(backend="uia").windows(process=app.pid):
+        title = win.window_text() or ""
+        if title.startswith("Fakturama - "):
+            continue
+        for button in win.descendants(control_type="Button"):
+            if (button.window_text() or "").strip().lower() == "ok":
+                button.click_input()
+                time.sleep(0.6)
+
+
+def set_text(app: App, control, value: str) -> str:
+    try:
+        control.set_edit_text(value)
+        time.sleep(0.15)
+        if val(control) == value:
+            return value
+    except Exception:
+        pass
+    click(control)
+    time.sleep(0.1)
+    send_keys_to(app, "^a")
+    send_keys_to(app, value)
+    send_keys_to(app, "{TAB}")
+    time.sleep(0.2)
+    try:
+        return val(control)
+    except Exception:
+        return ""
+
+
+def set_field(app: App, title: str, value: str,
+              control_type: str = "Edit", retries: int = 2) -> str:
+    got = ""
+    for _ in range(retries):
+        ctrl = app.spec.child_window(title=title,
+                                     control_type=control_type).wrapper_object()
+        got = set_text(app, ctrl, value)
+        if got == value:
+            return got
+        ctrl = app.spec.child_window(title=title,
+                                     control_type=control_type).wrapper_object()
+        got = val(ctrl)
+        if got == value:
+            return got
+    raise RuntimeError(f"field {title!r} did not stick (got {got!r})")
+
+
+def type_field(app: App, title: str, value: str,
+               control_type: str = "Edit", commit=None) -> str:
+    """Click, select-all and type. `commit` is a control to click to leave the
+    field (Tab inserts a tab in Fakturama's multi-line edits)."""
+    ctrl = app.spec.child_window(title=title,
+                                 control_type=control_type).wrapper_object()
+    click(ctrl)
+    time.sleep(0.1)
+    send_keys_to(app, "^a")
+    send_keys_to(app, value)
+    if commit is not None:
+        click(commit)
+    else:
+        send_keys_to(app, "{TAB}")
+    time.sleep(0.3)
+    ctrl = app.spec.child_window(title=title,
+                                 control_type=control_type).wrapper_object()
+    got = val(ctrl)
+    if got != value:
+        raise RuntimeError(f"field {title!r} did not stick (got {got!r})")
+    return got
+
+
+def dismiss_internal_error(app: App) -> bool:
+    """Close Fakturama's 'Internal Error' dialog (empty-row Ctrl+C bug)."""
+    candidates = list(app.wrapper.descendants(control_type="Window"))
+    candidates += list(Desktop(backend="uia").windows(process=app.pid))
+    for window in candidates:
+        if (window.window_text() or "").strip() != "Internal Error":
+            continue
+        for button in window.descendants(control_type="Button"):
+            if (button.window_text() or "").strip() == "OK":
+                button.click_input()
+                time.sleep(0.5)
+                return True
+    return False
+
+
+def select_combo(app: App, combo, text: str) -> str:
+    wanted = text.strip()
+    try:
+        combo.select(wanted)
+        time.sleep(0.25)
+        if (combo.selected_text() or "").strip() == wanted:
+            return wanted
+    except Exception:
+        pass
+
+    try:
+        combo.expand()
+    except Exception:
+        try:
+            click(combo)
+        except Exception:
+            pass
+    time.sleep(0.5)
+
+    items = [item for item in
+             app.wrapper.descendants(control_type="ListItem")
+             if (item.window_text() or "").strip() == wanted]
+    if not items:
+        for win in Desktop(backend="uia").windows(process=app.pid):
+            items += [item for item in win.descendants(control_type="ListItem")
+                      if (item.window_text() or "").strip() == wanted]
+    if not items:
+        # Editable combo fallback: type the value directly.
+        try:
+            click(combo)
+            send_keys_to(app, "^a")
+            send_keys_to(app, wanted)
+            send_keys_to(app, "{ENTER}")
+            time.sleep(0.4)
+            return wanted
+        except Exception:
+            pass
+    if not items:
+        raise RuntimeError(f"combo option {text!r} not found")
+    click(items[0])
+    time.sleep(0.35)
+    return wanted

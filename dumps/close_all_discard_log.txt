@@ -1,0 +1,2 @@
+dialog: '' SysShadow
+tabs: ['Documents']

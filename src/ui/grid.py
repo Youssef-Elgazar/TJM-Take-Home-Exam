@@ -111,13 +111,88 @@ def grid_columns(app: App, grid=None) -> dict:
     return columns
 
 
+_GRID_LAYOUT: dict = {}
+
+
+def set_grid_layout(app: App, layout: dict) -> None:
+    """Use the vision model's column x / row y positions for cell clicks."""
+    grid = grid_rect(app)
+    if grid is None:
+        return
+    key = (grid.left, grid.top, grid.right, grid.bottom)
+    _GRID_LAYOUT[key] = layout
+    _ROW_CACHE.pop(key, None)
+
+
+def clear_grid_layout() -> None:
+    _GRID_LAYOUT.clear()
+
+
+def grid_layout_via_llm(app: App) -> dict:
+    from ..extract.llm import read_grid_with_llm
+
+    grid = grid_rect(app)
+    if grid is None:
+        raise RuntimeError("items grid not found")
+    win = app.wrapper.rectangle()
+    image = app.wrapper.capture_as_image()
+    crop = image.crop((grid.left - win.left, grid.top - win.top,
+                       grid.right - win.left, grid.bottom - win.top))
+    DUMPS.mkdir(exist_ok=True)
+    path = DUMPS / "grid_llm.png"
+    crop.save(path)
+    return read_grid_with_llm(path)
+
+
+_ROW_CACHE: dict = {}
+
+
+def grid_row_centers(app: App, grid, force: bool = False) -> dict:
+    """OCR the Pos column so variable-height rows map to the right y."""
+    cache_key = (grid.left, grid.top, grid.right, grid.bottom)
+    if not force and cache_key in _ROW_CACHE:
+        return _ROW_CACHE[cache_key]
+    centers: dict[int, float] = {}
+    try:
+        win = app.wrapper.rectangle()
+        image = app.wrapper.capture_as_image()
+        crop = image.crop((grid.left - win.left, grid.top - win.top,
+                           grid.right - win.left, grid.bottom - win.top))
+        DUMPS.mkdir(exist_ok=True)
+        path = DUMPS / "grid_rows.png"
+        crop.save(path)
+        for line in run_ocr(path).lines:
+            text = (line.text or "").strip()
+            if text.isdigit() and line.left < 45:
+                centers[int(text)] = (line.top + line.bottom) / 2.0
+        _ROW_CACHE.clear()
+        _ROW_CACHE[cache_key] = centers
+    except Exception:
+        pass
+    return centers
+
+
 def cell_xy(app: App, row: int, column: str, grid=None):
     grid = grid or grid_rect(app)
     if grid is None:
         raise RuntimeError("items grid not found")
+    layout = _GRID_LAYOUT.get((grid.left, grid.top, grid.right, grid.bottom))
+    if layout:
+        col = layout.get("columns", {}).get(column)
+        row_info = next((item for item in layout.get("rows", [])
+                         if item.get("pos") == row), None)
+        if col and row_info:
+            return (int(round(grid.left + col["x"])),
+                    int(round(grid.top + row_info["y"])))
+
     columns = grid_columns(app, grid)
+    centers = grid_row_centers(app, grid)
+    if row not in centers:
+        # A line was added after the cache was built; recompute.
+        centers = grid_row_centers(app, grid, force=True)
+    y_offset = centers.get(row, ROW_TOP + ROW_HEIGHT * (row - 1))
     return (int(round(grid.left + columns.get(column, COLUMNS[column]))),
-            int(round(grid.top + ROW_TOP + ROW_HEIGHT * (row - 1))))
+            int(round(grid.top + y_offset)))
 
 
 def read_row(app: App, row: int, grid=None) -> list[str]:
@@ -139,6 +214,24 @@ def read_row_amounts(app: App, row: int, grid=None) -> dict:
         "discount": parse_money(fields[7]) if len(fields) > 7 else None,
         "line_price": parse_money(fields[8]) if len(fields) > 8 else None,
     }
+
+
+def wait_for_row(app: App, row: int, sku: str,
+                 timeout: float = 12.0) -> dict:
+    """Wait until the newly added line is rendered and readable at `row`."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        grid = grid_rect(app)  # the items area grows when a line is added
+        if grid is None:
+            time.sleep(0.3)
+            continue
+        centers = grid_row_centers(app, grid, force=True)
+        if row in centers:
+            amounts = read_row_amounts(app, row, grid)
+            if (amounts.get("sku") or "").strip() == (sku or "").strip():
+                return amounts
+        time.sleep(0.4)
+    raise RuntimeError(f"row {row} ({sku!r}) did not appear")
 
 
 def _edit_handles(app: App) -> set:

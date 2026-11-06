@@ -1,0 +1,7 @@
+Name 'Bank Transfer'
+Description 'Bank Transfer'
+Cash discount '0%'
+Discount Days '0'
+Net Days '0'
+code: 'Credit transfer '
+edits: [(<RECT L3, T870, R380, B1017>, "'Internal Error in: com.sebulli.fakturama.parts.DocumentEditor$8#mouseDown (2395)\\r\\nInternal Error in: com.sebulli.fakturama.parts.DocumentEditor$8#mouseDown (2395)'"), (<RECT L593, T188, R1912, B214>, "'Bank Transfer'"), (<RECT L595, T221, R1889, B242>, "''"), (<RECT L593, T249, R1912, B275>, "'Bank Transfer'"), (<RECT L593, T313, R1912, B339>, "'0%'"), (<RECT L593, T344, R1912, B370>, "'0'"), (<RECT L593, T375, R1912, B401>, "'0'"), (<RECT L593, T406, R1868, B464>, "''"), (<RECT L593, T469, R1868, B527>, "''"), (<RECT L593, T532, R1868, B590>, "''"), (<RECT L593, T599, R807, B625>, "'Cash'"), (<RECT L1752, T675, R1902, B701>, "''")]

@@ -1,0 +1,11 @@
+  !! expected window not in foreground, skipping keys: ^w
+Ctrl+W: False
+windows (descendants):
+  window: 'Save Parts' #32770 (L775, T208, R1146, B662)
+    btn: 'OK' (L871, T605, R993, B635)
+    btn: 'Cancel' (L1001, T605, R1123, B635)
+    btn: 'Minimize' (L959, T209, R1019, B246)
+    btn: 'Maximize' (L1019, T209, R1078, B246)
+    btn: 'Close' (L1078, T209, R1138, B246)
+top-level windows:
+tabs: ['Addresses', 'Miscellaneous', 'Notice', 'Fakturama', '*New Order', 'Bank Transfer', '*New Debtor', 'Documents', 'terms of payment']
