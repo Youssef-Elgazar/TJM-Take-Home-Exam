@@ -13,8 +13,7 @@ from ..screens import order as order_screen
 from ..screens import payment as payment_screen
 from ..screens import product as product_screen
 from ..ui.driver import get_app, reset_perspective, snap
-from ..ui.grid import (edit_cell, grid_layout_via_llm, read_row_amounts,
-                       set_grid_layout)
+from ..ui.grid import edit_cell, read_row_amounts, wait_for_row
 from ..ui.selectors import select_existing_debtor, select_existing_product
 
 PAYMENT_CODES = {
@@ -41,7 +40,31 @@ def _num(value) -> str:
     return str(int(value)) if value.is_integer() else f"{value:.2f}"
 
 
+# Per-stage wall-clock timings, printed at the end of the run.
+_STAGE_TIMES: list[tuple[str, float]] = []
+_STAGE_LAST = time.perf_counter()
+
+
+def stage(name: str) -> None:
+    """Record the elapsed time since the previous ``stage`` call."""
+    global _STAGE_LAST
+    now = time.perf_counter()
+    _STAGE_TIMES.append((name, now - _STAGE_LAST))
+    _STAGE_LAST = now
+
+
+def report_timings() -> None:
+    log("---- stage timings ----")
+    for name, seconds in _STAGE_TIMES:
+        log(f"  {name:28s} {seconds:6.2f}s")
+    log(f"  {'TOTAL':28s} {sum(s for _, s in _STAGE_TIMES):6.2f}s")
+
+
 def run(image_path: str) -> dict:
+    global _STAGE_LAST
+    _STAGE_TIMES.clear()
+    _STAGE_LAST = time.perf_counter()
+    stage("extract")
     order, ocr = extract_order(image_path)
     log("extracted:", order.external_reference, order.debtor.company,
         [item.sku for item in order.items], order.totals)
@@ -55,6 +78,7 @@ def run(image_path: str) -> dict:
     log("[1] Payment method")
     code = PAYMENT_CODES.get(order.payment.method, "Mutually defined")
     payment_screen.create_payment_method(app, order.payment.method, code)
+    stage("payment method")
 
     log("[2] Products")
     for item in order.items:
@@ -63,54 +87,46 @@ def run(image_path: str) -> dict:
         else:
             log("  creating", item.sku)
             product_screen.create_product(app, item)
+    stage("products")
 
-    log("[3] New Order")
+    log("[3] Debtor")
+    if debtor_screen.debtor_exists(app, order.debtor.company):
+        log("  exists", order.debtor.company)
+    else:
+        log("  creating", order.debtor.company)
+        debtor_screen.create_debtor(app, order.debtor, order.payment.method)
+    stage("debtor")
+
+    log("[4] New Order")
     order_screen.open_new_order(app)
     order_screen.clear_all_lines(app)
     log("  date ->", order_screen.set_date(app, order.order_date))
     log("  Cust.Ref. ->",
         order_screen.set_cust_ref(app, order.external_reference))
     log("  mode ->", order_screen.set_net_mode(app))
+    stage("new order")
 
-    log("[4] Debtor")
-    try:
-        debtor_no = select_existing_debtor(app, order.debtor)
-        log("  selected", debtor_no)
-    except ManualReviewRequired:
-        log("  not found; creating", order.debtor.company)
-        debtor_screen.create_debtor(app, order.debtor, order.payment.method)
-        order_screen.activate_order_tab(app)
-        debtor_no = select_existing_debtor(app, order.debtor)
-        log("  created and selected", debtor_no)
+    log("[5] Debtor select")
+    debtor_no = select_existing_debtor(app, order.debtor)
+    log("  selected", debtor_no)
     snap(app, "itc_1_debtor")
+    stage("debtor select")
 
     log("[6] Items")
-    for item in order.items:
+    for index, item in enumerate(order.items, start=1):
         select_existing_product(app, item.sku)
-    time.sleep(1.5)
-
-    layout = grid_layout_via_llm(app)
-    set_grid_layout(app, layout)
-    row_by_sku = {str(row.get("item_no", "")).strip(): row.get("pos")
-                  for row in layout.get("rows", [])}
-    log("  vision rows:", row_by_sku)
-
-    for item in order.items:
-        row = row_by_sku.get(item.sku)
-        if row is None:
-            raise ManualReviewRequired(
-                f"grid row for {item.sku} not found in the vision layout")
-        edit_cell(app, row, "qty", _num(item.qty))
-        edit_cell(app, row, "u_price", _num(item.unit_net))
-        edit_cell(app, row, "discount", _num(item.discount_pct))
-        result = read_row_amounts(app, row)
-        log(f"  line {row} {item.sku}: {result}")
-        check(f"line {row} qty", result.get("qty"), item.qty)
-        check(f"line {row} unit price", result.get("unit_price"),
+        wait_for_row(app, index, item.sku)
+        edit_cell(app, index, "qty", _num(item.qty))
+        edit_cell(app, index, "discount", _num(item.discount_pct))
+        result = read_row_amounts(app, index)
+        log(f"  line {index} {item.sku}: {result}")
+        check(f"line {index} qty", result.get("qty"), item.qty)
+        check(f"line {index} unit price", result.get("unit_price"),
               item.unit_net)
-        check(f"line {row} line price", result.get("line_price"),
+        check(f"line {index} line price", result.get("line_price"),
               item.line_net)
     snap(app, "itc_2_items")
+    stage("items")
 
     log("[7] Totals")
     totals = order_screen.read_totals(app)
@@ -118,11 +134,13 @@ def run(image_path: str) -> dict:
     check("Total Net", totals.get("Total Net"), order.totals.net)
     check("VAT", totals.get("VAT"), order.totals.vat)
     check("Total", totals.get("Total"), order.totals.gross)
+    stage("totals check")
 
     log("[8] Save order")
     order_screen.save(app)
     order_number = order_screen.saved_order_number(app)
     log("  saved as", order_number)
+    stage("save order")
 
     log("[9] Invoice")
     invoice_screen.create_followup_invoice(app)
@@ -142,11 +160,14 @@ def run(image_path: str) -> dict:
     check("Invoice Total Net", totals.get("Total Net"), order.totals.net)
     check("Invoice VAT", totals.get("VAT"), order.totals.vat)
     check("Invoice Total", totals.get("Total"), order.totals.gross)
+    stage("invoice")
 
     log("[10] Cleanup")
     documents.close_all_tabs(app)
     documents.open_documents(app)
+    stage("cleanup")
 
+    report_timings()
     log("IMAGE->CASH OK")
     return {"order": order_number, "invoice": invoice_number,
             "totals": totals}

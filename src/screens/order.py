@@ -20,12 +20,16 @@ def maximize_editor(app: App) -> None:
                app.wrapper.descendants(control_type="Button")
                if (button.window_text() or "").strip()
                in ("Minimize", "Maximize", "Restore")
-               and button.rectangle().left > 1700
-               and 120 <= button.rectangle().top <= 190]
-    buttons.sort(key=lambda item: item.rectangle().left)
-    if len(buttons) >= 2 and (buttons[1].window_text() or "").strip() == "Maximize":
-        click(buttons[1])
-        time.sleep(1.2)
+               and button.rectangle().left > 1700]
+    # Exclude the main Fakturama title-bar buttons (top near 0).
+    buttons = [button for button in buttons
+               if button.rectangle().top > 60]
+    buttons.sort(key=lambda item: item.rectangle().top)
+    for button in buttons:
+        if (button.window_text() or "").strip() == "Maximize":
+            click(button)
+            time.sleep(1.2)
+            return
 
 
 def open_new_order(app: App) -> None:

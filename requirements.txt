@@ -1,5 +1,7 @@
 pywinauto==0.6.9
 pillow>=10.0
 rapidocr>=3.10
-onnxruntime>=1.17
+onnxruntime-gpu>=1.17   # GPU (CUDA) OCR; swap for `onnxruntime` to run CPU-only
+nvidia-cudnn-cu12       # cuDNN 9 runtime required by onnxruntime-gpu on Windows
+opencv-python-headless  # OpenCV (cv2) for the grid row-detection fallback
 requests>=2.31
