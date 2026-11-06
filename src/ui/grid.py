@@ -1,4 +1,10 @@
-"""Items grid geometry and clipboard read/write helpers."""
+"""Items grid geometry and clipboard read/write helpers.
+
+The grid is custom-drawn, so cells are located by local image processing only
+(no LLM round-trip): column x-centres come from OCR of the header labels, and
+row y-centres from OCR of the ``Pos`` numbers, with an OpenCV horizontal-line
+fallback when the row numbers are not recognised.
+"""
 from __future__ import annotations
 
 import re
@@ -111,44 +117,48 @@ def grid_columns(app: App, grid=None) -> dict:
     return columns
 
 
-_GRID_LAYOUT: dict = {}
-
-
-def set_grid_layout(app: App, layout: dict) -> None:
-    """Use the vision model's column x / row y positions for cell clicks."""
-    grid = grid_rect(app)
-    if grid is None:
-        return
-    key = (grid.left, grid.top, grid.right, grid.bottom)
-    _GRID_LAYOUT[key] = layout
-    _ROW_CACHE.pop(key, None)
-
-
-def clear_grid_layout() -> None:
-    _GRID_LAYOUT.clear()
-
-
-def grid_layout_via_llm(app: App) -> dict:
-    from ..extract.llm import read_grid_with_llm
-
-    grid = grid_rect(app)
-    if grid is None:
-        raise RuntimeError("items grid not found")
-    win = app.wrapper.rectangle()
-    image = app.wrapper.capture_as_image()
-    crop = image.crop((grid.left - win.left, grid.top - win.top,
-                       grid.right - win.left, grid.bottom - win.top))
-    DUMPS.mkdir(exist_ok=True)
-    path = DUMPS / "grid_llm.png"
-    crop.save(path)
-    return read_grid_with_llm(path)
-
-
 _ROW_CACHE: dict = {}
 
 
+def _row_centers_via_lines(gray) -> list[float]:
+    """Best-effort row centres from the grid's horizontal separator lines.
+
+    Used only when OCR cannot read the ``Pos`` numbers. The grid draws a
+    horizontal line under every row, so the y-centre of each row is the
+    midpoint between two consecutive lines (skipping the header separator).
+    """
+    import cv2
+    import numpy as np
+
+    arr = np.asarray(gray)
+    if arr.ndim == 3:
+        arr = cv2.cvtColor(arr, cv2.COLOR_RGB2GRAY)
+    edges = cv2.Canny(arr, 50, 150)
+    hkernel = cv2.getStructuringElement(cv2.MORPH_RECT,
+                                        (max(2, arr.shape[1] // 2), 1))
+    horizontal = cv2.morphologyEx(edges, cv2.MORPH_OPEN, hkernel)
+    row_sum = horizontal.sum(axis=1)
+    ys = [int(i) for i in range(len(row_sum)) if row_sum[i] > 0]
+    if not ys:
+        return []
+    bounds: list[float] = []
+    start = prev = ys[0]
+    for y in ys[1:]:
+        if y - prev > 3:
+            bounds.append((start + prev) / 2.0)
+            start = y
+        prev = y
+    bounds.append((start + prev) / 2.0)
+    return [(bounds[i - 1] + bounds[i]) / 2.0 for i in range(1, len(bounds))]
+
+
 def grid_row_centers(app: App, grid, force: bool = False) -> dict:
-    """OCR the Pos column so variable-height rows map to the right y."""
+    """Map each ``Pos`` number to its row's y-centre (variable-height rows).
+
+    Reads the ``Pos`` column with OCR; if no row numbers are recognised it
+    falls back to OpenCV horizontal-line detection, which yields the same
+    centres in reading order (1, 2, 3, ...).
+    """
     cache_key = (grid.left, grid.top, grid.right, grid.bottom)
     if not force and cache_key in _ROW_CACHE:
         return _ROW_CACHE[cache_key]
@@ -165,6 +175,10 @@ def grid_row_centers(app: App, grid, force: bool = False) -> dict:
             text = (line.text or "").strip()
             if text.isdigit() and line.left < 45:
                 centers[int(text)] = (line.top + line.bottom) / 2.0
+        if not centers:
+            fallback = _row_centers_via_lines(crop.convert("L"))
+            # The first detected band is the header; data rows follow in order.
+            centers = {i: cy for i, cy in enumerate(fallback[1:], start=1)}
         _ROW_CACHE.clear()
         _ROW_CACHE[cache_key] = centers
     except Exception:
@@ -176,14 +190,6 @@ def cell_xy(app: App, row: int, column: str, grid=None):
     grid = grid or grid_rect(app)
     if grid is None:
         raise RuntimeError("items grid not found")
-    layout = _GRID_LAYOUT.get((grid.left, grid.top, grid.right, grid.bottom))
-    if layout:
-        col = layout.get("columns", {}).get(column)
-        row_info = next((item for item in layout.get("rows", [])
-                         if item.get("pos") == row), None)
-        if col and row_info:
-            return (int(round(grid.left + col["x"])),
-                    int(round(grid.top + row_info["y"])))
 
     columns = grid_columns(app, grid)
     centers = grid_row_centers(app, grid)

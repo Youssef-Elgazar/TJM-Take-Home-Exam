@@ -1,8 +1,35 @@
 """RapidOCR wrapper: returns text with confidence and boxes in reading order."""
 from __future__ import annotations
 
+import os
+import sys
 from dataclasses import dataclass, field
 from pathlib import Path
+
+
+def _add_nvidia_dll_dirs() -> None:
+    """Put pip-installed NVIDIA CUDA/cuDNN ``bin`` dirs on the DLL search path.
+
+    onnxruntime-gpu needs ``cudnn64_9.dll`` (and friends) at runtime; the
+    ``nvidia-*-cu12`` wheels drop them under ``site-packages/nvidia/<pkg>/bin``,
+    which is not on ``PATH`` by default.
+    """
+    try:
+        nvidia = Path(sys.prefix) / "Lib" / "site-packages" / "nvidia"
+        if not nvidia.is_dir():
+            return
+        existing = set(os.environ.get("PATH", "").split(os.pathsep))
+        bins = [str(p / "bin") for p in nvidia.iterdir()
+                if (p / "bin").is_dir()]
+        added = [b for b in bins if b not in existing]
+        if added:
+            os.environ["PATH"] = os.pathsep.join(
+                added + [os.environ.get("PATH", "")])
+    except Exception:
+        pass
+
+
+_add_nvidia_dll_dirs()
 
 
 @dataclass
@@ -77,12 +104,44 @@ def _reading_order(lines: list[OcrLine], row_tolerance: float = 12.0) -> list[Oc
 _engine = None
 
 
+def _cuda_available() -> bool:
+    """True when onnxruntime ships a working CUDAExecutionProvider."""
+    try:
+        import onnxruntime as ort
+        return ("CUDAExecutionProvider" in ort.get_available_providers()
+                and ort.get_device() == "GPU")
+    except Exception:
+        return False
+
+
 def get_engine():
-    """Lazily create the RapidOCR engine (model load is expensive)."""
+    """Lazily create the RapidOCR engine (model load is expensive).
+
+    Uses the CUDA (GPU) execution provider when onnxruntime-gpu is installed
+    and actually runs (a missing cuDNN is detected and falls back to CPU).
+    Engine creation is cached so the models load only once per process.
+    """
     global _engine
     if _engine is None:
         from rapidocr import RapidOCR
 
+        if _cuda_available():
+            import numpy as np
+            probe = np.full((32, 32, 3), 255, dtype=np.uint8)
+            try:
+                engine = RapidOCR(params={
+                    "EngineConfig.onnxruntime.use_cuda": True,
+                    # The grid crops vary in size on every call; EXHAUSTIVE
+                    # cuDNN algorithm search re-optimises per shape and stalls.
+                    "EngineConfig.onnxruntime.cuda_ep_cfg."
+                    "cudnn_conv_algo_search": "HEURISTIC",
+                })
+                engine(probe)  # force the models to load; raises without cuDNN
+                _engine = engine
+                return _engine
+            except Exception as exc:
+                print(f"[ocr] CUDA engine unusable ({exc}); using CPU",
+                      file=sys.stderr)
         _engine = RapidOCR()
     return _engine
 
