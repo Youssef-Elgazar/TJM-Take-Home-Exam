@@ -1,0 +1,16 @@
+[Error tab edits]
+'PO000002'
+'6 Nov 2026'
+'£0.00'
+'0%'
+'Free of shipping costs'
+'£0.00'
+'£0.00'
+'£0.00'
+'Internal Error in: com.sebulli.fakturama.parts.DocumentEditor$8#mouseDown (2395)'
+  !! expected window not in foreground, skipping keys: ^{F4}
+
+Ctrl+F4 sent: False
+
+[top-level windows]
+tabs now: ['Invoice address', 'Fakturama', 'New Order', 'Error']

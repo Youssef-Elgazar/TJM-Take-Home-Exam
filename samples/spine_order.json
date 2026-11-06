@@ -1,0 +1,52 @@
+{
+  "external_reference": "SPINE-001",
+  "order_date": "2026-07-14",
+  "customer_id_in_image": "",
+  "currency": "GBP",
+  "debtor": {
+    "company": "MAMarine",
+    "alias": "",
+    "contact": {
+      "first_name": "Youssef",
+      "last_name": "Elgazar",
+      "email": "",
+      "phone": ""
+    },
+    "billing": {
+      "name": "MAMarine",
+      "street": "Ahmed Allam",
+      "zip": "316924",
+      "city": "Alexandria",
+      "country": "Egypt"
+    },
+    "delivery": {
+      "name": "MAMarine",
+      "street": "Ahmed Allam",
+      "zip": "316924",
+      "city": "Alexandria",
+      "country": "Egypt"
+    }
+  },
+  "payment": {
+    "method": "Pay Cash",
+    "status": "PAID",
+    "date": "2026-07-18"
+  },
+  "items": [
+    {
+      "sku": "TST-A-01",
+      "description": "Test Product Alpha",
+      "qty": 2,
+      "unit": "pcs",
+      "unit_net": 100.00,
+      "discount_pct": 10,
+      "vat_pct": 19,
+      "line_net": 180.00
+    }
+  ],
+  "totals": {
+    "net": 180.00,
+    "vat": 34.20,
+    "gross": 214.20
+  }
+}

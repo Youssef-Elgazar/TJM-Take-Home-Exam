@@ -1,0 +1,5 @@
+foreground: 526140 target: 787932 match: False
+force_foreground: True
+foreground now: 787932
+tabs: ['Fakturama']
+keyboard test (ESC): True

@@ -1,0 +1,8 @@
+tab rect: (L479, T131, R633, B155)
+dx=-8: no dialog, tabs= ['Invoice address', 'Fakturama', '*New Order']
+dx=-4: no dialog, tabs= ['Invoice address', 'Fakturama', '*New Order']
+dx=2: no dialog, tabs= ['Invoice address', 'Fakturama', '*New Order']
+dx=8: no dialog, tabs= ['Invoice address', 'Fakturama', '*New Order']
+dx=14: no dialog, tabs= ['Invoice address', 'Fakturama', '*New Order']
+dx=20: no dialog, tabs= ['Invoice address', 'Fakturama', '*New Order']
+no close control found

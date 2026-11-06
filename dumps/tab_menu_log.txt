@@ -1,0 +1,2 @@
+right-clicking tab at (520, 152)
+main-window menu items: ['System', 'System', 'File', 'Edit', 'Data', 'New', 'Extra', 'Window', 'Help']

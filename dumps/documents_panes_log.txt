@@ -1,0 +1,9 @@
+tabs: ['Documents', 'VATs', 'terms of payment', 'Invoice address', 'Fakturama', 'PO000002', 'INV000001']
+pane: '' (L0, T131, R1897, B1020)
+pane: '' (L0, T131, R1897, B1020)
+pane: 'Fakturama Perspective' (L0, T131, R1897, B1020)
+pane: '' (L0, T131, R1897, B1020)
+pane: 'INV000001' (L386, T158, R1894, B1017)
+pane: '' (L386, T158, R1894, B1017)
+pane: '' (L386, T158, R1894, B728)
+pane: '' (L386, T158, R1894, B728)

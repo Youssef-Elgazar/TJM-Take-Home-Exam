@@ -1,0 +1,10 @@
+controls in the tab strip:
+Tab | '*New Order' | (L383, T131, R1897, B1020) | SWT_Window0
+Pane | 'New Order' | (L386, T158, R1894, B1017) | SWT_Window0
+Pane | '' | (L386, T158, R1894, B1017) | SWT_Window0
+Pane | '' | (L386, T158, R1894, B728) | SWT_Window0
+Pane | '' | (L386, T158, R1894, B728) | SWT_Window0
+Pane | '' | (L430, T170, R1398, B198) | SWT_Window0
+Pane | '' | (L899, T170, R1053, B198) | SWT_Window0
+TabItem | 'Fakturama' | (L383, T131, R479, B155) | 
+TabItem | '*New Order' | (L479, T131, R633, B155) | 

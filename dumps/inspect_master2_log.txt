@@ -1,0 +1,17 @@
+[debtors]
+CRASHED:
+Traceback (most recent call last):
+  File "C:\Users\joe\Projects\TJM\Take-Home-Exam\tests\probes\fk.py", line 173, in run
+    main()
+    ~~~~^^
+  File "C:\Users\joe\Projects\TJM\Take-Home-Exam\tests\probes\inspect_master2.py", line 69, in main
+    log(f"  {term!r}:", repr(debtor_lookup(spec, w, term)))
+                             ~~~~~~~~~~~~~^^^^^^^^^^^^^^^
+  File "C:\Users\joe\Projects\TJM\Take-Home-Exam\tests\probes\inspect_master2.py", line 24, in debtor_lookup
+    dlg.child_window(control_type="Edit").set_edit_text(term)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  File "C:\Users\joe\Projects\TJM\Take-Home-Exam\.venv\Lib\site-packages\pywinauto\controls\uia_controls.py", line 462, in set_edit_text
+    self.iface_value.SetValue(new_text)
+    ~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^
+_ctypes.COMError: (-2147220992, None, (None, None, None, 0, None))
+

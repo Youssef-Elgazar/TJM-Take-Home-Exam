@@ -1,0 +1,53 @@
+script started
+start: '6 Nov 2026' | rect: (L937, T188, R1066, B205)
+
+[1] segment under each x: click, UP, read, DOWN, read
+   dx=  3: '6 Nov 2026' -> '7 Nov 2026' -> '6 Nov 2026'  segment=day
+   dx=  7: '6 Nov 2026' -> '7 Nov 2026' -> '6 Nov 2026'  segment=day
+   dx= 11: '6 Nov 2026' -> '6 Dec 2026' -> '6 Nov 2026'  segment=month
+   dx= 15: '6 Nov 2026' -> '6 Dec 2026' -> '6 Nov 2026'  segment=month
+   dx= 19: '6 Nov 2026' -> '6 Dec 2026' -> '6 Nov 2026'  segment=month
+   dx= 23: '6 Nov 2026' -> '6 Dec 2026' -> '6 Nov 2026'  segment=month
+   dx= 27: '6 Nov 2026' -> '6 Dec 2026' -> '6 Nov 2026'  segment=month
+   dx= 31: '6 Nov 2026' -> '6 Dec 2026' -> '6 Nov 2026'  segment=month
+   dx= 35: '6 Nov 2026' -> '6 Dec 2026' -> '6 Nov 2026'  segment=month
+   dx= 39: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 43: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 47: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 51: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 55: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 59: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 63: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 67: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 71: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 75: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 79: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 83: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 87: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 91: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 95: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx= 99: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx=103: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx=107: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx=111: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx=115: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   dx=119: '6 Nov 2026' -> '6 Nov 2027' -> '6 Nov 2026'  segment=year
+   ranges: {'day': (3, 7), 'month': (11, 35), 'year': (39, 119)}
+
+[2] typing into one segment at a time
+   typed '2025' in year: '6 Nov 2025'
+   typed '2026' in year: '6 Nov 2026'
+   typed 'Jul' in month: '6 Nov 2026'
+   typed '7' in month: '6 07 2026'
+   typed '14' in day: '14 Jul 2026'
+
+[3] reach (14, 'Jul', 2026) with UP/DOWN steps
+   year: delta 0
+   -> '14 Jul 2026'
+   month: delta 0
+   -> '14 Jul 2026'
+   day: delta 0
+   -> '14 Jul 2026'
+   after leaving the field: '14 Jul 2026'
+
+Done. Close the order tab WITHOUT saving.

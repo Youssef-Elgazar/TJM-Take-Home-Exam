@@ -1,0 +1,10 @@
+Cust.Ref. edits: [(<RECT L428, T253, R808, B279>, "''")]
+foreground after click: 853928 target: 787932 match: False
+value before: ''
+  !! expected window not in foreground, skipping keys: ^a
+^a: False
+  !! expected window not in foreground, skipping keys: TEST-REF
+text: False
+  !! expected window not in foreground, skipping keys: {TAB}
+tab: False
+after: [(<RECT L428, T253, R808, B279>, "''")]
