@@ -153,11 +153,11 @@ def _row_centers_via_lines(gray) -> list[float]:
 
 
 def grid_row_centers(app: App, grid, force: bool = False) -> dict:
-    """Map each ``Pos`` number to its row's y-centre (variable-height rows).
+    """Map each row number to its y-centre (variable-height rows).
 
-    Reads the ``Pos`` column with OCR; if no row numbers are recognised it
-    falls back to OpenCV horizontal-line detection, which yields the same
-    centres in reading order (1, 2, 3, ...).
+    Clusters the OCR text lines by vertical centre instead of relying on the
+    tiny ``Pos`` digits, which OCR reads unreliably. The topmost cluster is the
+    header row; every cluster below it is a data row in reading order.
     """
     cache_key = (grid.left, grid.top, grid.right, grid.bottom)
     if not force and cache_key in _ROW_CACHE:
@@ -171,14 +171,17 @@ def grid_row_centers(app: App, grid, force: bool = False) -> dict:
         DUMPS.mkdir(exist_ok=True)
         path = DUMPS / "grid_rows.png"
         crop.save(path)
-        for line in run_ocr(path).lines:
-            text = (line.text or "").strip()
-            if text.isdigit() and line.left < 45:
-                centers[int(text)] = (line.top + line.bottom) / 2.0
-        if not centers:
-            fallback = _row_centers_via_lines(crop.convert("L"))
-            # The first detected band is the header; data rows follow in order.
-            centers = {i: cy for i, cy in enumerate(fallback[1:], start=1)}
+        lines = sorted((line for line in run_ocr(path).lines
+                        if (line.text or "").strip()),
+                       key=lambda item: item.cy)
+        clusters: list[list[float]] = []
+        for line in lines:
+            if clusters and abs(line.cy - sum(clusters[-1]) / len(clusters[-1])) <= 12:
+                clusters[-1].append(line.cy)
+            else:
+                clusters.append([line.cy])
+        centers = {i: sum(cluster) / len(cluster)
+                   for i, cluster in enumerate(clusters[1:], start=1)}
         _ROW_CACHE.clear()
         _ROW_CACHE[cache_key] = centers
     except Exception:

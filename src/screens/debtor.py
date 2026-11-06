@@ -8,8 +8,17 @@ from ..ui.driver import (App, click, label, select_combo, send_keys_to,
 from .lists import list_contains
 
 
-def debtor_exists(app: App, company: str) -> bool:
-    return list_contains(app, "Debtors", company)
+def debtor_exists(app: App, debtor) -> bool:
+    """True when this debtor is already listed.
+
+    The Debtors list quick-search keys on a single term (the contact's first
+    name), so probe the first name, then the last name, then the company.
+    """
+    for term in (debtor.contact.first_name, debtor.contact.last_name,
+                 debtor.company):
+        if term and list_contains(app, "Debtors", term):
+            return True
+    return False
 
 
 def _edits_on_row(app: App, label_text: str):
@@ -62,7 +71,7 @@ def create_debtor(app: App, debtor, payment_method: str) -> None:
     if not navs:
         raise RuntimeError("New Contact navigation not found")
     click(navs[0])
-    time.sleep(2.0)
+    time.sleep(1.2)
 
     names = _edits_on_row(app, "First Name Last Name")
     if len(names) < 2:

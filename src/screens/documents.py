@@ -28,7 +28,7 @@ def close_all_tabs(app: App) -> None:
         send_keys_to(app, "{ESC}")
         raise RuntimeError("'Close All' menu item not found")
     click(close_all)
-    time.sleep(1.5)
+    time.sleep(1.0)
 
 
 def open_documents(app: App) -> None:
@@ -38,4 +38,4 @@ def open_documents(app: App) -> None:
     if not navs:
         raise RuntimeError("Documents navigation item not found")
     click(navs[0])
-    time.sleep(1.5)
+    time.sleep(0.8)

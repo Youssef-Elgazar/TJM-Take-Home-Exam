@@ -12,7 +12,7 @@ def create_followup_invoice(app: App) -> None:
     group.wait("exists", timeout=8)
     group.child_window(title="Invoice",
                        control_type="Button").click_input()
-    time.sleep(2.0)
+    time.sleep(0.6)
     from .order import wait_for_tab
     wait_for_tab(app, "New Invoice")
 
@@ -94,7 +94,7 @@ def read_totals(app: App) -> dict:
 def save(app: App) -> None:
     app.spec.child_window(title="Save the current contents",
                           control_type="Button").click_input()
-    time.sleep(1.5)
+    time.sleep(0.8)
 
 
 def invoice_number(app: App, timeout: float = 10.0) -> str:

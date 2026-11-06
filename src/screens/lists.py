@@ -19,7 +19,7 @@ def open_list(app: App, name: str) -> None:
     if not navs:
         raise RuntimeError(f"navigation item {name!r} not found")
     click(navs[0])
-    time.sleep(1.2)
+    time.sleep(0.8)
 
 
 def list_contains(app: App, nav_name: str, text: str) -> bool:
@@ -32,7 +32,7 @@ def list_contains(app: App, nav_name: str, text: str) -> bool:
     send_keys_to(app, "^a")
     send_keys_to(app, text)
     send_keys_to(app, "{TAB}")
-    time.sleep(1.0)
+    time.sleep(0.7)
     try:
         win = app.wrapper.rectangle()
         image = app.wrapper.capture_as_image()

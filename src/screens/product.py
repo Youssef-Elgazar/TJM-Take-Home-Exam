@@ -29,7 +29,7 @@ def create_product(app: App, item) -> None:
     if not navs:
         raise RuntimeError("New product navigation not found")
     click(navs[0])
-    time.sleep(2.0)
+    time.sleep(1.2)
 
     set_field(app, "Item Number", item.sku)
     set_field(app, "Name", item.description)

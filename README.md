@@ -7,8 +7,10 @@ records, applies the payment status, and verifies each saved record.
 
 The UI is driven with **Microsoft UI Automation (UIA)** — controls are found by name,
 label-relative geometry, or clipboard readback, never by hardcoded coordinates. Data
-is extracted with **RapidOCR** and optionally an **LLM** vision pass, then validated by
-deterministic code before any UI interaction.
+is extracted with **RapidOCR** (GPU-accelerated via ONNX Runtime's CUDA provider) and
+optionally an **LLM** vision pass, then validated by deterministic code before any UI
+interaction. The line-item grid is read with local OCR/image processing only — no LLM
+round-trip.
 
 The optional vision stage calls Anthropic's Messages API with the model configured in
 `ANTHROPIC_MODEL` (default **`claude-sonnet-4-5`**). The pipeline also runs fully
@@ -35,7 +37,7 @@ Implemented:
   Run it with `python -m src.flows.spine samples\spine_order.json`.
 - **Full sample pipeline** (verified) — image → payment method → products →
   debtor → Order → linked Invoice → PAID verification. A fresh run on this
-  machine (creating everything from scratch) took **239.6 s (~4 minutes)**.
+  machine (creating everything from scratch) took **182.2 s (~3 minutes)**.
 
 In progress:
 
@@ -81,7 +83,10 @@ In progress:
 - Fakturama installed and running for the UI flow.
 - Python 3.12+ (developed on 3.14).
 - RapidOCR ships its own ONNX models; no separate Tesseract install is needed.
-- An Anthropic API key is only needed for the optional LLM stage; OCR works offline.
+- OCR uses the GPU via `onnxruntime-gpu` + `nvidia-cudnn-cu12` (falls back to
+  CPU automatically when the CUDA provider is unavailable).
+- An Anthropic API key is only needed for the optional LLM extraction stage; OCR
+  works offline.
 
 ## Setup
 
@@ -145,9 +150,15 @@ Starting from Fakturama with no orders, this extracts the image (OCR +
 builds and saves the Order, creates the linked Invoice, applies the PAID state,
 and verifies the totals.
 
-**Measured end-to-end duration:** **239.6 seconds (~4 minutes)** for a fresh run
+**Measured end-to-end duration:** **182.2 seconds (~3 minutes)** for a fresh run
 on this machine (creating the payment method, both products, the debtor, the
-Order and the Invoice).
+Order and the Invoice). A re-run with the master data already present takes
+~108 s. Per-stage wall-clock timings are printed at the end of every run.
+
+The Items grid is located with local image processing only (OCR header + OCR
+row clustering), no LLM round-trip, and each line is edited right after it is
+added. Products are created with their unit price so the Order lines inherit it
+directly (no per-line price patch).
 
 ## Configuration
 
@@ -201,8 +212,6 @@ unreachable.
 
 ## What is skipped
 
-- The vision grid path requires an Anthropic API key; without it the extraction
-  still runs on OCR, but the grid-layout call would fail.
 - Documents-list readback is not automated; the saved Order/Invoice tabs are read
   back and verified instead.
 - Annotated screenshots / a recording will be added.
@@ -214,9 +223,10 @@ unreachable.
   the order.
 - **More UI interactions** — remaining document types, selector edge cases, and
   other layouts/themes/DPI settings.
-- **Faster product grid** — cache the vision layout, use OCR/geometry first, and
-  run extraction in parallel with UI setup to get a full sample under 200 s
-  (currently 239.6 s).
+- **Cut idle time in the creation branches** — the debtor/product/payment creation
+  steps are the largest share of a fresh run; replace their fixed settle sleeps with
+  condition-based waits and run image extraction in parallel with UI setup to push
+  the fresh sample well under 200 s (currently 182.2 s).
 - **Idempotency/resume** for leftover unsaved records and existing master data.
 - **Resilience** — auto-dismiss the "Internal Error"/"Save Parts" dialogs and
   retry transient UIA failures.
