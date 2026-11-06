@@ -19,7 +19,7 @@ offline with OCR only.
 | Part | State |
 |---|---|
 | 1. Design document | [`docs/design.md`](docs/design.md) |
-| 2. Implementation | extraction + validation complete; spine flow (existing debtor/product) verified |
+| 2. Implementation | extraction + validation + full sample pipeline (creation branches) verified |
 
 Implemented:
 
@@ -33,12 +33,13 @@ Implemented:
 - **Spine flow** (verified) — New Order → existing debtor → existing product →
   totals check → save → linked Invoice → PAID + date + value → totals check.
   Run it with `python -m src.flows.spine samples\spine_order.json`.
+- **Full sample pipeline** (verified) — image → payment method → products →
+  debtor → Order → linked Invoice → PAID verification. A fresh run on this
+  machine (creating everything from scratch) took **239.6 s (~4 minutes)**.
 
 In progress:
 
-- Creation branches for a missing debtor, payment method, VAT rate and product
-  (needed to process the sample image end to end).
-- The sample-image run (the spine currently uses `samples/spine_order.json`).
+- Final tests, screenshots/recording, and the README/design-doc polish.
 
 ## Repository layout
 
@@ -65,8 +66,10 @@ In progress:
 │   │   ├── extract.py       image -> validated order orchestrator
 │   │   └── __main__.py      CLI
 │   ├── ui/                  UIA driver, clipboard, grid geometry, selectors
-│   ├── screens/             order and invoice screens
-│   └── flows/spine.py       Order-first spine flow
+│   ├── screens/             order, invoice, debtor, product, payment, lists
+│   └── flows/
+│       ├── spine.py         existing-master-data spine
+│       └── image_to_cash.py full sample pipeline
 └── tests/
     ├── test_extract.py
     └── probes/              exploratory UIA probes (kept for reference)
@@ -128,8 +131,23 @@ python -m src.flows.spine samples\spine_order.json
 
 It opens an Order, resolves the existing debtor and product, checks the totals,
 saves the Order, creates the linked Invoice, applies PAID + date + value, and
-verifies the invoice totals. If the debtor or product is missing it stops with
-`ManualReviewRequired` (creation branches are not implemented yet).
+verifies the invoice totals. (The spine only selects existing master data; the
+full pipeline below creates it when missing.)
+
+## Run the full sample pipeline
+
+```powershell
+python -m src.flows.image_to_cash samples\order_sample.png
+```
+
+Starting from Fakturama with no orders, this extracts the image (OCR +
+`claude-sonnet-4-5`), creates the missing payment method, products and debtor,
+builds and saves the Order, creates the linked Invoice, applies the PAID state,
+and verifies the totals.
+
+**Measured end-to-end duration:** **239.6 seconds (~4 minutes)** for a fresh run
+on this machine (creating the payment method, both products, the debtor, the
+Order and the Invoice).
 
 ## Configuration
 
@@ -183,17 +201,24 @@ unreachable.
 
 ## What is skipped
 
-- The creation branches (new debtor, payment method, VAT rate, product) are not
-  wired up yet, so the sample image cannot run end to end.
-- Documents-list readback is not automated yet; the saved Order/Invoice tabs are
-  read back and verified instead.
+- The vision grid path requires an Anthropic API key; without it the extraction
+  still runs on OCR, but the grid-layout call would fail.
+- Documents-list readback is not automated; the saved Order/Invoice tabs are read
+  back and verified instead.
 - Annotated screenshots / a recording will be added.
 
 ## If I had 3 more hours
 
-Resume and clean-up logic for leftover unsaved records; a test harness with recorded
-UIA trees and more sample images (rotated, photographed, multi-page); self-healing
-locators using OCR-derived column positions; stronger extraction with a second model
-pass and confidence thresholds; support for order-level discounts, shipping and
-multiple payment methods; locale-independent date and number entry; and a recorded run
-with a structured JSON report.
+- **Invoice verification layer** — reopen the saved Invoice and compare every
+  persisted field (payment method, paid state, date, value, lines, totals) against
+  the order.
+- **More UI interactions** — remaining document types, selector edge cases, and
+  other layouts/themes/DPI settings.
+- **Faster product grid** — cache the vision layout, use OCR/geometry first, and
+  run extraction in parallel with UI setup to get a full sample under 200 s
+  (currently 239.6 s).
+- **Idempotency/resume** for leftover unsaved records and existing master data.
+- **Resilience** — auto-dismiss the "Internal Error"/"Save Parts" dialogs and
+  retry transient UIA failures.
+- **Structured run report** with per-stage timings and screenshots on failure.
+- **Locale-independent** date/number/currency entry.
