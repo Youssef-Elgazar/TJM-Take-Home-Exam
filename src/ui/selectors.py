@@ -102,7 +102,7 @@ def select_existing_debtor(app: App, debtor) -> str:
     dialog = dialog_spec.wrapper_object()
     search = dialog_spec.child_window(control_type="Edit")
     search.set_edit_text(debtor.company)
-    time.sleep(1.5)
+    time.sleep(1.0)
 
     rows = _walk_rows(app, dialog, search.rectangle())
     matches = []
@@ -128,7 +128,7 @@ def select_existing_debtor(app: App, debtor) -> str:
 
     index, fields = matches[0]
     _select_row(app, dialog, dialog_spec, len(rows), index)
-    time.sleep(0.9)
+    time.sleep(0.5)
     return fields["no"]
 
 
@@ -156,7 +156,7 @@ def select_existing_product(app: App, sku: str) -> str:
     dialog_spec.wait("exists", timeout=8)
     search = dialog_spec.child_window(control_type="Edit")
     search.set_edit_text(sku)
-    time.sleep(1.5)
+    time.sleep(1.0)
 
     if not dialog_spec.exists():
         return "auto-selected"
@@ -184,5 +184,5 @@ def select_existing_product(app: App, sku: str) -> str:
 
     index, fields = matches[0]
     _select_row(app, dialog, dialog_spec, len(rows), index)
-    time.sleep(0.9)
+    time.sleep(0.5)
     return "selected"

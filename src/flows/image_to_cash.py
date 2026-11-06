@@ -64,14 +64,18 @@ def run(image_path: str) -> dict:
     global _STAGE_LAST
     _STAGE_TIMES.clear()
     _STAGE_LAST = time.perf_counter()
-    stage("extract")
-    order, ocr = extract_order(image_path)
-    log("extracted:", order.external_reference, order.debtor.company,
-        [item.sku for item in order.items], order.totals)
 
+    # Bring the app up and reset its perspective first, so we are not sitting
+    # idle on the home page while the image extraction runs.
     app = get_app()
     reset_perspective(app)
     snap(app, "itc_0_start")
+    stage("startup")
+
+    order, ocr = extract_order(image_path)
+    log("extracted:", order.external_reference, order.debtor.company,
+        [item.sku for item in order.items], order.totals)
+    stage("extract")
 
     # Master data first: creating products from inside an open Order makes
     # Fakturama throw a callEditor error in this build.
@@ -90,7 +94,7 @@ def run(image_path: str) -> dict:
     stage("products")
 
     log("[3] Debtor")
-    if debtor_screen.debtor_exists(app, order.debtor.company):
+    if debtor_screen.debtor_exists(app, order.debtor):
         log("  exists", order.debtor.company)
     else:
         log("  creating", order.debtor.company)

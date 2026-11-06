@@ -28,7 +28,7 @@ def maximize_editor(app: App) -> None:
     for button in buttons:
         if (button.window_text() or "").strip() == "Maximize":
             click(button)
-            time.sleep(1.2)
+            time.sleep(0.8)
             return
 
 
@@ -42,7 +42,7 @@ def open_new_order(app: App) -> None:
             return
     app.spec.child_window(title="Create: New Order",
                           control_type="Button").click_input()
-    time.sleep(2.0)
+    time.sleep(0.6)
     wait_for_tab(app, "New Order")
     maximize_editor(app)
 
@@ -199,7 +199,7 @@ def read_totals(app: App) -> dict:
 def save(app: App) -> None:
     app.spec.child_window(title="Save the current contents",
                           control_type="Button").click_input()
-    time.sleep(1.5)
+    time.sleep(0.8)
 
 
 def saved_order_number(app: App, timeout: float = 10.0) -> str:
