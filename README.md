@@ -37,7 +37,7 @@ Implemented:
   Run it with `python -m src.flows.spine samples\spine_order.json`.
 - **Full sample pipeline** (verified) — image → payment method → products →
   debtor → Order → linked Invoice → PAID verification. A fresh run on this
-  machine (creating everything from scratch) took **182.2 s (~3 minutes)**.
+  machine (creating everything from scratch) took **177.1 s (~3 minutes)**.
 
 In progress:
 
@@ -150,7 +150,7 @@ Starting from Fakturama with no orders, this extracts the image (OCR +
 builds and saves the Order, creates the linked Invoice, applies the PAID state,
 and verifies the totals.
 
-**Measured end-to-end duration:** **182.2 seconds (~3 minutes)** for a fresh run
+**Measured end-to-end duration:** **177.1 seconds (~3 minutes)** for a fresh run
 on this machine (creating the payment method, both products, the debtor, the
 Order and the Invoice). A re-run with the master data already present takes
 ~108 s. Per-stage wall-clock timings are printed at the end of every run.
@@ -159,6 +159,14 @@ The Items grid is located with local image processing only (OCR header + OCR
 row clustering), no LLM round-trip, and each line is edited right after it is
 added. Products are created with their unit price so the Order lines inherit it
 directly (no per-line price patch).
+
+To time a fresh run repeatedly, `scripts\reset_fakturama.py` soft-deletes the
+master data (products, contacts, payment methods) while keeping the seeded
+defaults (VAT rates, categories):
+
+```powershell
+python scripts\reset_fakturama.py
+```
 
 ## Configuration
 
@@ -226,7 +234,7 @@ unreachable.
 - **Cut idle time in the creation branches** — the debtor/product/payment creation
   steps are the largest share of a fresh run; replace their fixed settle sleeps with
   condition-based waits and run image extraction in parallel with UI setup to push
-  the fresh sample well under 200 s (currently 182.2 s).
+  the fresh sample well under 200 s (currently 177.1 s).
 - **Idempotency/resume** for leftover unsaved records and existing master data.
 - **Resilience** — auto-dismiss the "Internal Error"/"Save Parts" dialogs and
   retry transient UIA failures.

@@ -29,7 +29,7 @@ def create_payment_method(app: App, name: str, code: str) -> None:
                                    control_type="Button")
     button.wait("exists enabled", timeout=8)
     button.click_input()
-    time.sleep(1.2)
+    time.sleep(0.9)
 
     set_field(app, "Name", name)
     set_field(app, "Description", name)
@@ -45,4 +45,4 @@ def create_payment_method(app: App, name: str, code: str) -> None:
 
     app.spec.child_window(title="Save the current contents",
                           control_type="Button").click_input()
-    time.sleep(1.2)
+    time.sleep(0.9)

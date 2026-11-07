@@ -240,7 +240,7 @@ def reset_perspective(app: App) -> None:
 def set_text(app: App, control, value: str) -> str:
     try:
         control.set_edit_text(value)
-        time.sleep(0.15)
+        time.sleep(0.12)
         if val(control) == value:
             return value
     except Exception:
@@ -288,7 +288,7 @@ def type_field(app: App, title: str, value: str,
         click(commit)
     else:
         send_keys_to(app, "{TAB}")
-    time.sleep(0.3)
+    time.sleep(0.2)
     ctrl = app.spec.child_window(title=title,
                                  control_type=control_type).wrapper_object()
     got = val(ctrl)
@@ -316,7 +316,7 @@ def select_combo(app: App, combo, text: str) -> str:
     wanted = text.strip()
     try:
         combo.select(wanted)
-        time.sleep(0.25)
+        time.sleep(0.15)
         if (combo.selected_text() or "").strip() == wanted:
             return wanted
     except Exception:

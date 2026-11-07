@@ -40,14 +40,14 @@ def _walk_rows(app: App, dialog, search_rect, max_rows: int = 25) -> list[str]:
     x = dialog.rectangle().left + 120
     y = search_rect.bottom + 40
     mouse.click(button="left", coords=(x, y))
-    time.sleep(0.3)
+    time.sleep(0.2)
 
     rows: list[str] = []
     previous = None
     for _ in range(max_rows):
         clip_clear()
         send_keys_to_hwnd(dialog.handle, "^c", dialog.rectangle())
-        time.sleep(0.25)
+        time.sleep(0.2)
         if dismiss_internal_error(app):
             return rows
         text = clip_get()
@@ -56,7 +56,7 @@ def _walk_rows(app: App, dialog, search_rect, max_rows: int = 25) -> list[str]:
         rows.append(text)
         previous = text
         send_keys_to_hwnd(dialog.handle, "{DOWN}", dialog.rectangle())
-        time.sleep(0.15)
+        time.sleep(0.1)
     return rows
 
 
@@ -70,7 +70,7 @@ def _select_row(app: App, dialog, dialog_spec, rows_count: int,
         send_keys_to_hwnd(dialog.handle, "{DOWN}", dialog.rectangle())
         time.sleep(0.04)
     dialog_spec.child_window(title="OK", control_type="Button").click_input()
-    time.sleep(0.4)
+    time.sleep(0.3)
 
 
 def _address_fields(raw: str) -> dict | None:
@@ -102,7 +102,7 @@ def select_existing_debtor(app: App, debtor) -> str:
     dialog = dialog_spec.wrapper_object()
     search = dialog_spec.child_window(control_type="Edit")
     search.set_edit_text(debtor.company)
-    time.sleep(1.0)
+    time.sleep(0.8)
 
     rows = _walk_rows(app, dialog, search.rectangle())
     matches = []
@@ -156,7 +156,7 @@ def select_existing_product(app: App, sku: str) -> str:
     dialog_spec.wait("exists", timeout=8)
     search = dialog_spec.child_window(control_type="Edit")
     search.set_edit_text(sku)
-    time.sleep(1.0)
+    time.sleep(0.8)
 
     if not dialog_spec.exists():
         return "auto-selected"
