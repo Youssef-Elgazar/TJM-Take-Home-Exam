@@ -14,6 +14,12 @@ The optional vision stage calls Anthropic's Messages API with the model configur
 `ANTHROPIC_MODEL` (default **`claude-sonnet-4-5`**). The pipeline also runs fully
 offline with OCR only.
 
+> **Active development** continues on the
+> [`optimizations`](https://github.com/Youssef-Elgazar/TJM-Take-Home-Exam/tree/optimizations)
+> branch — GPU-accelerated OCR, an OCR-only item-grid, per-line editing, and a fresh
+> end-to-end run of **~177 s** (down from ~240 s). See that branch for the latest code,
+> timings, and the `scripts\reset_fakturama.py` helper.
+
 ## Status
 
 | Part | State |
