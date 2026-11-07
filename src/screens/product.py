@@ -29,7 +29,7 @@ def create_product(app: App, item) -> None:
     if not navs:
         raise RuntimeError("New product navigation not found")
     click(navs[0])
-    time.sleep(1.2)
+    time.sleep(0.9)
 
     set_field(app, "Item Number", item.sku)
     set_field(app, "Name", item.description)
@@ -68,4 +68,4 @@ def create_product(app: App, item) -> None:
 
     app.spec.child_window(title="Save the current contents",
                           control_type="Button").click_input()
-    time.sleep(1.2)
+    time.sleep(0.9)

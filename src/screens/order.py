@@ -88,14 +88,14 @@ def set_date(app: App, iso_date: str, edit=None) -> str:
                      (int(width * 0.19), str(month)),
                      (int(width * 0.04), str(day))):
         mouse.click(button="left", coords=(rect.left + dx, ymid))
-        time.sleep(0.2)
+        time.sleep(0.15)
         send_keys_to(app, text)
-        time.sleep(0.2)
+        time.sleep(0.15)
     # Commit the segmented field by moving focus to Cust.Ref.
     ref = app.spec.child_window(title="Cust.Ref.",
                                 control_type="Edit").wrapper_object()
     click(ref)
-    time.sleep(0.5)
+    time.sleep(0.4)
     got = val(edit)
     expected = f"{day} {MONTHS[month - 1]} {year}"
     if got != expected:

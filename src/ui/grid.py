@@ -207,10 +207,10 @@ def cell_xy(app: App, row: int, column: str, grid=None):
 def read_row(app: App, row: int, grid=None) -> list[str]:
     x, y = cell_xy(app, row, "pos", grid)
     mouse.click(button="left", coords=(x, y))
-    time.sleep(0.3)
+    time.sleep(0.2)
     clip_clear()
     send_keys_to(app, "^c")
-    time.sleep(0.25)
+    time.sleep(0.2)
     return (clip_get() or "").split("\t")
 
 
@@ -268,4 +268,4 @@ def edit_cell(app: App, row: int, column: str, text: str,
     send_keys_to(app, "^a")
     send_keys_to(app, text)
     send_keys_to(app, "{ENTER}")
-    time.sleep(0.3)
+    time.sleep(0.2)

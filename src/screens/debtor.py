@@ -39,7 +39,7 @@ def _check_role(app: App, role: str) -> None:
     if not arrows:
         raise RuntimeError("address type arrow not found")
     click(arrows[0])
-    time.sleep(0.6)
+    time.sleep(0.45)
 
     boxes = [box for box in app.wrapper.descendants(control_type="CheckBox")
              if (box.window_text() or "").strip() == role]
@@ -47,9 +47,9 @@ def _check_role(app: App, role: str) -> None:
         raise RuntimeError(f"role checkbox {role!r} not found")
     if boxes[0].get_toggle_state() != 1:
         click(boxes[0])
-        time.sleep(0.3)
+        time.sleep(0.2)
     send_keys_to(app, "{ESC}")
-    time.sleep(0.2)
+    time.sleep(0.15)
 
 
 def _set_address(app: App, address) -> None:
@@ -71,7 +71,7 @@ def create_debtor(app: App, debtor, payment_method: str) -> None:
     if not navs:
         raise RuntimeError("New Contact navigation not found")
     click(navs[0])
-    time.sleep(1.2)
+    time.sleep(0.9)
 
     names = _edits_on_row(app, "First Name Last Name")
     if len(names) < 2:
@@ -95,7 +95,7 @@ def create_debtor(app: App, debtor, payment_method: str) -> None:
         plus = app.spec.child_window(title="+",
                                      control_type="Button").wrapper_object()
         click(plus)
-        time.sleep(1.2)
+        time.sleep(0.9)
         set_field(app, "additional name", debtor.delivery.name)
         _set_address(app, debtor.delivery)
         _check_role(app, "Delivery address")
@@ -105,7 +105,7 @@ def create_debtor(app: App, debtor, payment_method: str) -> None:
     if not misc:
         raise RuntimeError("Miscellaneous tab not found")
     click(misc[0])
-    time.sleep(0.6)
+    time.sleep(0.4)
     set_field(app, "Alias name", debtor.alias)
     discount = app.spec.child_window(title="Discount",
                                      control_type="Edit").wrapper_object()
@@ -120,4 +120,4 @@ def create_debtor(app: App, debtor, payment_method: str) -> None:
 
     app.spec.child_window(title="Save the current contents",
                           control_type="Button").click_input()
-    time.sleep(1.2)
+    time.sleep(0.9)
