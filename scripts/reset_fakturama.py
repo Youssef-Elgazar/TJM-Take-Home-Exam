@@ -28,6 +28,10 @@ MASTER_TABLES = {
     'INSERT INTO "FKT_PAYMENT" VALUES(': 4,
 }
 
+# Fakturama seeds a default "Cash" payment method (payment-code 'ZZZ') on first
+# run. It is not test data and must survive a reset.
+SEEDED_PAYMENT_CODES = {"'ZZZ'"}
+
 
 def _split_values(body: str) -> list[str]:
     """Split a HSQLDB VALUES body on commas, respecting single-quoted strings."""
@@ -71,6 +75,11 @@ def _soft_delete_line(line: str) -> str:
         if end <= start:
             return line
         parts = _split_values(line[start:end])
+        # Skip seeded defaults (e.g. Fakturama's built-in "Cash" payment method).
+        if (prefix == 'INSERT INTO "FKT_PAYMENT" VALUES('
+                and len(parts) >= 2
+                and parts[1].strip() in SEEDED_PAYMENT_CODES):
+            return line
         if len(parts) >= del_col:
             parts[del_col - 1] = "TRUE"
         return line[:start] + ",".join(parts) + line[end:]
